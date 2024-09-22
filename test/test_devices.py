@@ -27,7 +27,7 @@ class DeviceTests(unittest.TestCase):
         registry = DevicesRegistry()
         registry.load_devices(devices_dir)
 
-        assert "water_pump" in registry.devices
+        assert "water_pump" in registry
 
     def test_load_devices__missing_type(self):
         registry = DevicesRegistry()
