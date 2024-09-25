@@ -1,0 +1,30 @@
+name: Run MicroPython Tests
+
+on:
+  push:
+    branches:
+      - '**' # Trigger on any branch push
+
+env:
+  DOCKER_IMAGE: micropython/unix
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install unittest via MIP
+        run: |
+          docker run --rm -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython -m mip install unittest
+
+      - name: Install dependencies via MIP
+        run: |
+          deps=$(jq -r '.deps[] | "\(.[0])@\(.[1])"' package.json)
+          echo "$deps" | xargs -I {} docker run --rm -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython -m mip install {}
+
+      - name: Run tests [test_devices.py]
+        run: |
+          docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib -w /code $DOCKER_IMAGE micropython test_devices.py

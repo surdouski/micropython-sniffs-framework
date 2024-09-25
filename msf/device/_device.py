@@ -1,7 +1,9 @@
+from settings import DEVICES_DIR
 import os
 import asyncio
 
 from mpstore import load_store, read_store, write_store
+from msf.utils.singleton import singleton
 
 # from common.singleton import singleton
 # from common.singleton import LocationSingleton, MQTTClientSingleton
@@ -46,6 +48,7 @@ class Setting(ValidationMixin):
         return self._value
 
     @value.setter
+    @require_valid
     def value(self, new_value: str | int | float):
         try:
             self._value = self._type(new_value)
@@ -150,8 +153,12 @@ class Device:
         return f"Device(name={self.name}, file_path={self.file_path}, settings={self.settings})"
 
 
-# @singleton
+@singleton
 class DevicesRegistry:
+    def reset(self):
+        self.devices = {}
+        self.devices_loaded = False
+
     def __getitem__(self, key: str) -> Device:
         return self.devices[key]
 
@@ -168,7 +175,7 @@ class DevicesRegistry:
         self.devices: dict[str, Device] = {}
         self.devices_loaded = False
 
-    def load_devices(self, devices_directory: str):
+    def load_devices(self):
         """Each device setting requires a value, type, and description. These are
         designated in json with a typical nested json object format. Note
         that _all_ values must be strings, which are then cast to a python object
@@ -188,9 +195,9 @@ class DevicesRegistry:
         if self.devices_loaded:
             return
 
-        for filename in os.listdir(devices_directory):
+        for filename in os.listdir(DEVICES_DIR):
             if filename.endswith(".json"):
-                file_path = f"{devices_directory}/{filename}"
+                file_path = f"{DEVICES_DIR}/{filename}"
                 json_device_settings_dict = load_store(file_path)
                 device_name = filename[:-5]  # Remove .json extension
 
@@ -212,19 +219,6 @@ class DevicesRegistry:
                     setting.validate()
                     device.settings[setting_name] = setting
         self.devices_loaded = True
-        # await self._publish_device(device_name)
-
-    # async def _publish_device(self, device_name: str):
-    #     location = LocationSingleton()
-    #     client = MQTTClientSingleton()
-    #     await asyncio.gather(
-    #         client.publish(
-    #             f"{location}/devices/{device_name}/{setting.name}",
-    #             setting.value,
-    #             retain=True,
-    #         )
-    #         for setting in self.devices["device_name"].values()
-    #     )
 
     def update_device_setting(
         self, device_name: str, setting_name: str, setting_value: any

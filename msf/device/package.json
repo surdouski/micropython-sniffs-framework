@@ -1,0 +1,10 @@
+{
+  "urls": [
+    "msf/device/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/device/__init__.py",
+    "msf/device/_device.py", "github:surdouski/micropython-sniffs-framework/msf/device/_device.py"
+  ],
+  "deps": [
+    ["github:surdouski/micropython-persistent-storage", "main"]
+  ],
+  "version": "0.1"
+}

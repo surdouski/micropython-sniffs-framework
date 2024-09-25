@@ -1,0 +1,8 @@
+{
+  "urls": [
+    "msf/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/utils/__init__.py",
+    "msf/utils/singleton.py", "github:surdouski/micropython-sniffs-framework/msf/utils/singleton.py"
+  ],
+  "deps": [],
+  "version": "0.1"
+}

@@ -4,6 +4,13 @@ Note: This will eventually encompass and/or use all the tools and utilities that
 repos. It is currently a WIP.
 
 
+## Installation
+
+Will write a more in depth approach to installations, but I am putting a `package.json` in most directories,
+each of them defining the requirements of that directory and any subdirectories. This should allow for easy
+installation of specific components of the project as the codebase becomes larger.
+
+
 ## Devices
 
 Device schemas go in the `/devices` directory and end with `.json`, (for example, `/devices/water_pump.json`).
