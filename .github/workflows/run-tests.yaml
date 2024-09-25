@@ -27,4 +27,4 @@ jobs:
 
       - name: Run tests [test_devices.py]
         run: |
-          docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib -w /code $DOCKER_IMAGE micropython test_devices.py
+          docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib -w /code $DOCKER_IMAGE micropython test/test_devices.py
