@@ -9,6 +9,7 @@
   ],
   "deps": [
     [
+      "pathlib",
       "github:surdouski/micropython-persistent-storage", "main",
       "github:peterhinch/micropython-mqtt", "master"
     ]
