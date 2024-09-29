@@ -1,12 +1,8 @@
-from settings import DEVICES_DIR
-import os
-import asyncio
+from pathlib import Path
+from settings import DEVICES_SETTINGS_PATH
 
-from mpstore import load_store, read_store, write_store
+from mpstore import write_store, read_store
 from msf.utils.singleton import singleton
-
-# from common.singleton import singleton
-# from common.singleton import LocationSingleton, MQTTClientSingleton
 
 
 class ValidationError(Exception):
@@ -17,147 +13,163 @@ class DeviceSettingsValidationError(Exception):
     ...
 
 
-class ValidationMixin:
-    _is_valid = None
+class DuplicateDeviceNameException(Exception):
+    pass
+
+
+class InvalidDeviceNameException(Exception):
+    pass
+
+
+class DuplicateDeviceSettingNameException(Exception):
+    pass
+
+
+class Setting:
+    supported_types = (str, int, float)
 
     @property
-    def is_valid(self) -> bool:
-        if self._is_valid is None:
-            self.validate()
-        return self._is_valid
-
-    def validate(self) -> bool:
-        ...
-
-
-def require_valid(func):
-    def wrapper(self, *args, **kwargs):
-        if not self.is_valid:
-            raise ValidationError("Object requires is_valid to be True, but was False.")
-        return func(self, *args, **kwargs)
-
-    return wrapper
-
-
-class Setting(ValidationMixin):
-    accepted_string_types = ("str", "int", "float")
-
-    @property
-    @require_valid
-    def value(self) -> str | int | float:
+    def value(self):  # -> str | int | float
         return self._value
 
-    @value.setter
-    @require_valid
-    def value(self, new_value: str | int | float):
-        try:
-            self._value = self._type(new_value)
-        except ValueError:
-            raise DeviceSettingsValidationError(
-                f"Cannot convert value '{new_value}' to type '{self._type}'."
-            )
-        write_store(f"{self.name}.value", str(self._value), self.file_path)
-
     @property
-    @require_valid
     def type(self) -> type:
         return self._type
+
+    @property
+    def description(self) -> str:
+        if self._description is None:
+            return f"Description for {self.name} with value of type {self.type.__name__}."
+
+    @property
+    def file_path(self) -> Path:
+        return self._file_path
 
     def __init__(
         self,
         name: str,
-        file_path: str,
-        string_value: str,
-        string_type: str,
+        value: any,
         description: str,
     ):
+        if not type(value) in self.supported_types:
+            raise DeviceSettingsValidationError(f"Setting '{name} required to be in: {self.supported_types}'")
+
         self.name = name
-        self.file_path = file_path
-        self.string_value = string_value
-        self.string_type = string_type
-        self.description = description
 
-        self._value: str | int | float | None = None
-        self._type: type | None = None
+        self._description = description
+        self._type = type(value)
+        self._value = value
+        self._file_path = None
 
-    def validate(self) -> bool:
-        if not self.string_value:
-            raise DeviceSettingsValidationError(
-                f"Setting '{self.name}' requires 'value' to be defined."
-            )
-        if not self.string_type:
-            raise DeviceSettingsValidationError(
-                f"Setting '{self.name}' requires 'type' to be defined. (str/int/float)"
-            )
-        if not self.description:
-            raise DeviceSettingsValidationError(
-                f"Setting '{self.name}' requires 'description' to be defined."
-            )
-        if "." in self.name:
-            raise DeviceSettingsValidationError(
-                f"Setting '{self.name}' contains invalid character '.'."
-            )
+    def set_path(self, file_path: Path):
+        self._file_path = file_path
 
-        if self.string_type not in self.accepted_string_types:
+    def update(self, value):
+        if not isinstance(value, self.type):
             raise DeviceSettingsValidationError(
-                f"'Setting '{self.name}' with type '{self.string_type}' is not a valid option. Valid options are: {self.accepted_string_types}."
+                f"Was given setting value '{value}', but was not of expected type '{self.type.__name__}'."
             )
+        self._value = value
+        self._on_update()
 
-        if self.string_type == "str":
-            self._type = str
-        elif self.string_type == "int":
-            self._type = int
-        elif self.string_type == "float":
-            self._type = float
+    def _on_update(self):
+        pass
 
-        try:
-            self._value = self._type(self.string_value)
-        except ValueError:
-            raise DeviceSettingsValidationError(
-                f"Setting '{self.name}' with value '{self.string_value}' is not a valid type '{self.string_type}'."
-            )
+    def on_update(self):
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                return func(self.value)
 
-        self._is_valid = True
-        return True
+            self._on_update = wrapper
+            return wrapper
+
+        return decorator
+
 
     def __repr__(self):
-        if not self._is_valid:
-            return f"UnvalidatedSetting(name={self.name})"
-        return f"Setting(name={self.name}, file_path={self.file_path}, value={self._value}, type={self._type})"
+        return f"Setting(name={self.name}, value={self._value})"
 
 
 class Settings:
-    def __init__(self):
-        self.settings: dict[str, Setting] = {}
+    def __init__(self, settings_dict: dict[str, Setting]):
+        self._dict = settings_dict
 
     def __getitem__(self, key: str) -> Setting:
-        return self.settings[key]
+        return self._dict[key]
 
     def __setitem__(self, key: str, value: any):
-        self.settings[key] = value
+        self._dict[key] = value
 
     def __contains__(self, key: str) -> bool:
-        return key in self.settings
+        return key in self._dict
+
+    def get(self, key: str):
+        return self._dict.get(key)
+
+    def values(self):
+        return self._dict.values()
+
+    def items(self):
+        return self._dict.items()
+
+    def keys(self):
+        return self._dict.keys()
 
     def __repr__(self):
-        return f"Settings({self.settings})"
+        return f"Settings({self._dict})"
 
 
 class Device:
-    def __init__(self, name: str, file_path: str):
-        self.name = name
-        self.file_path = file_path
-        self.settings = Settings()
+    name: str
+    settings: Settings
+
+    def __init__(self, device_name: str, settings: list[Setting]):
+        if "." in device_name:
+            raise InvalidDeviceNameException(f"Attempted to create a new device with name {device_name}, but character '.' is not allowed in device name.")
+        if DevicesRegistry().get(device_name):
+            raise DuplicateDeviceNameException(f"Attempted to create a new device with name {device_name}, but a device with that name already exists.")
+        self.name = device_name
+
+        settings_map: dict[str, Setting] = {}
+        for setting in settings:
+            if settings_map.get(setting.name):
+                raise DuplicateDeviceSettingNameException(f"Attempted to create a new device setting with name {setting.name}, but a device setting with that name already exists.")
+
+            _store_setting = read_store(f"{device_name}.{setting.name}", str(DEVICES_SETTINGS_PATH))
+            if not _store_setting:
+                # If it does not exist, we want to write an initial setting
+                setting_dict = {
+                    "value": str(setting.value),
+                    "type": setting.type.__name__,
+                    "description": setting.description
+                }
+                write_store(f"{device_name}.{setting.name}", setting_dict, str(DEVICES_SETTINGS_PATH))
+            else:
+                # If it does exist, we want to update the setting object's value from the current JSON setting
+                _value = _store_setting["value"]
+                try:
+                    setting._value = setting.type(_value)
+                except ValueError:
+                    raise DeviceSettingsValidationError(
+                        f"Cannot convert setting value '{_value}' to type '{setting.type.__name__}'."
+                    )
+
+            settings_map[setting.name] = setting
+
+        self.settings = Settings(settings_map)
+
+        DevicesRegistry()[device_name] = self
+
+    def _list_settings(self) -> list[Setting]:
+        return [_setting for _setting in self.settings.values()]
 
     def __repr__(self):
-        return f"Device(name={self.name}, file_path={self.file_path}, settings={self.settings})"
+        return f"Device(name={self.name}, settings={self._list_settings()})"
 
 
 @singleton
 class DevicesRegistry:
-    def reset(self):
-        self.devices = {}
-        self.devices_loaded = False
+    device_settings_path: Path = DEVICES_SETTINGS_PATH  # For ease of access
 
     def __getitem__(self, key: str) -> Device:
         return self.devices[key]
@@ -171,54 +183,18 @@ class DevicesRegistry:
     def __contains__(self, key: str) -> bool:
         return key in self.devices
 
+    def get(self, device_name) -> Device:  # |  None
+        if device_name in self:
+            return self[device_name]
+        return None
+
     def __init__(self):
         self.devices: dict[str, Device] = {}
         self.devices_loaded = False
 
-    def load_devices(self):
-        """Each device setting requires a value, type, and description. These are
-        designated in json with a typical nested json object format. Note
-        that _all_ values must be strings, which are then cast to a python object
-        based on the type.
-
-        For example:
-        ```json
-        {
-          "duty_cycle": {
-            "value": "0.3",
-            "type": "float",  # str, int, float
-            "description": "Specifies the fraction of time the device is in an active or operational state during a complete cycle. A value of 0.3 means the device is active 30% of the time."
-          }
-        }
-        ```
-        """
-        if self.devices_loaded:
-            return
-
-        for filename in os.listdir(DEVICES_DIR):
-            if filename.endswith(".json"):
-                file_path = f"{DEVICES_DIR}/{filename}"
-                json_device_settings_dict = load_store(file_path)
-                device_name = filename[:-5]  # Remove .json extension
-
-                device = Device(device_name, file_path)
-                self.devices[device_name] = device
-
-                for setting_name, setting_dict in json_device_settings_dict.items():
-                    if not setting_dict or not isinstance(setting_dict, dict):
-                        raise DeviceSettingsValidationError(
-                            f"Setting '{setting_name}' must be a json dict with defined keys for value, type, and description."
-                        )
-
-                    value = setting_dict.get("value")
-                    _type = setting_dict.get("type")
-                    description = setting_dict.get("description")
-                    setting = Setting(
-                        setting_name, file_path, value, _type, description
-                    )
-                    setting.validate()
-                    device.settings[setting_name] = setting
-        self.devices_loaded = True
+    def reset(self):
+        self.devices = {}
+        self.devices_loaded = False
 
     def update_device_setting(
         self, device_name: str, setting_name: str, setting_value: any
@@ -233,10 +209,5 @@ class DevicesRegistry:
             )
 
         setting = device.settings[setting_name]
-
-        try:
-            setting.value = setting.type(setting_value)
-        except ValueError:
-            raise DeviceSettingsValidationError(
-                f"Cannot convert setting '{setting_value}' to type '{setting.type}'."
-            )
+        setting.update(setting_value)
+        write_store(f"{device_name}.{setting.name}.value", str(setting.value), str(DEVICES_SETTINGS_PATH))
