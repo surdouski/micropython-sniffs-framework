@@ -8,11 +8,9 @@
     "msf/utils/singleton.py", "github:surdouski/micropython-sniffs-framework/msf/utils/singleton.py"
   ],
   "deps": [
-    [
-      "pathlib",
-      "github:surdouski/micropython-persistent-storage", "main",
-      "github:peterhinch/micropython-mqtt", "master"
-    ]
+    ["pathlib", "latest"],
+    ["github:surdouski/micropython-persistent-storage", "main"],
+    ["github:peterhinch/micropython-mqtt", "master"]
   ],
   "version": "0.2"
 }

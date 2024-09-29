@@ -4,10 +4,8 @@
     "msf/device/_device.py", "github:surdouski/micropython-sniffs-framework/msf/device/_device.py"
   ],
   "deps": [
-    [
-      "pathlib",
-      "github:surdouski/micropython-persistent-storage", "main"
-    ]
+    ["pathlib", "latest"],
+    ["github:surdouski/micropython-persistent-storage", "main"]
   ],
   "version": "0.1"
 }
