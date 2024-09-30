@@ -4,5 +4,5 @@
     ["msf/utils/singleton.py", "github:surdouski/micropython-sniffs-framework/msf/utils/singleton.py"]
   ],
   "deps": [],
-  "version": "0.1"
+  "version": "0.2"
 }

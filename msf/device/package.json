@@ -7,5 +7,5 @@
     ["pathlib", "latest"],
     ["github:surdouski/micropython-persistent-storage", "main"]
   ],
-  "version": "0.1"
+  "version": "0.2"
 }
