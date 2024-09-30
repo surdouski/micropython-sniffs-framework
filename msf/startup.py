@@ -14,10 +14,7 @@ from usniffs import Sniffs
 from mqtt_as import config, MQTTClient
 
 sniffs = Sniffs()
-
-
 devices = DevicesRegistry()
-devices.load_devices()
 
 
 @sniffs.route(MQTT_DEVICES_TOPIC + "/<device>/<setting>")
