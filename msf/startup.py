@@ -28,12 +28,9 @@ async def update_devices(device, setting, message):
 
 
 async def startup():
-    mqtt_as_config = load_store(MQTT_AS_CONFIG_PATH)
+    mqtt_as_config = load_store(str(MQTT_AS_CONFIG_PATH))
     for key, val in mqtt_as_config.items():
         config[key] = val
     mqtt_client = MQTTClient(config)
     await sniffs.bind(mqtt_client)
     await sniffs.client.connect()
-
-    while True:
-        await asyncio.sleep(10)

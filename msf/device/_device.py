@@ -66,9 +66,12 @@ class Setting:
 
     def update(self, value):
         if not isinstance(value, self.type):
-            raise DeviceSettingsValidationError(
-                f"Was given setting value '{value}', but was not of expected type '{self.type.__name__}'."
-            )
+            try:
+                value = self.type(value)
+            except Exception:
+                raise DeviceSettingsValidationError(
+                    f"Was given setting value '{value}', but was not of expected type '{self.type.__name__}'."
+                )
         self._value = value
         self._on_update()
 

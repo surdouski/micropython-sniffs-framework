@@ -84,15 +84,19 @@ class DeviceTests(unittest.TestCase):
                 "water_pump", "foo_setting", "invalid_value"
             )
 
+    def test_update_device_setting__castable_value_to_type(self):
+        self.registry.update_device_setting("water_pump", "duty_cycle", "0.22")
+        assert self.duty_cycle.value == 0.22, f"Expected: 0.22, Actual: {self.duty_cycle.value}"
+
     def test_store_invalid_value_conversion(self):
         with self.assertRaises(DeviceSettingsValidationError):
             invalid_setting = Setting(
-                "invalid_setting", "value_as_string", "Invalid setting description."
+                "invalid_setting", 99, "Invalid setting description."
             )
             # Attempting to convert string to a type it cannot handle
             invalid_device = Device("invalid_device", [invalid_setting])
             self.registry.update_device_setting(
-                "invalid_device", "invalid_setting", 3.14
+                "invalid_device", "invalid_setting", "22.0"
             )
 
     def test_json_settings_saved_correctly(self):
