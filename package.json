@@ -10,7 +10,7 @@
   "deps": [
     ["pathlib", "latest"],
     ["github:surdouski/micropython-persistent-storage", "main"],
-    ["github:peterhinch/micropython-mqtt", "master"]
+    ["github:surdouski/micropython-sniffs", "main"]
   ],
-  "version": "0.2"
+  "version": "0.3"
 }
