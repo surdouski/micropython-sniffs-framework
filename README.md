@@ -1,8 +1,5 @@
 # Micropython Sniffs Framework
 
-Note: This will eventually encompass and/or use all the tools and utilities that are currently distributed across many
-repos. It is currently a WIP.
-
 ## What is the purpose of this project?
 
 I want to create a micropython-native framework for IoT. I don't like the current state of IoT related to:
@@ -29,16 +26,18 @@ make a framework. A framework should solve common problems and offer a variety t
 
 ## Installation
 
-~~Will write a more in depth approach to installations, but I am putting a `package.json` in most directories,
-each of them defining the requirements of that directory and any subdirectories. This should allow for easy
-installation of specific components of the project as the codebase becomes larger.~~ To simplify development for now,
-I am leaving a single `package.json` at the top level for installation, since the project is not large. So, for now,
-simply install with the following command:
+I've built a cli tool that I recommend using. It can help with setting up an initial project and running a local MQTT broker
+for testing your application. Github repo with details/readme [msf-cli](https://github.com/surdouski/msf-cli).
+
+```bash
+pipx install msf-cli
+```
+
+If you only want to install the framework library.
 
 ```bash
 mpremote mip install github:surdouski/micropython-sniffs-framework 
 ```
-
 ## Device/Setting
 
 ### Why should I use these `Device` and `Setting` classes?
