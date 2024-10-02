@@ -1,7 +1,7 @@
 from pathlib import Path
 from msf.settings import *  # Import default settings
 
-user_settings_path = Path(__file__).parent.parent / "settings.py"
+user_settings_path = Path(__file__).parent.parent.parent / "settings.py"
 
 def load_user_settings():
     if user_settings_path.exists():
