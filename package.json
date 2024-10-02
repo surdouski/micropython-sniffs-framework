@@ -5,7 +5,7 @@
     ["msf/settings.py", "github:surdouski/micropython-sniffs-framework/msf/settings.py"],
     ["msf/device/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/device/__init__.py"],
     ["msf/device/_device.py", "github:surdouski/micropython-sniffs-framework/msf/device/_device.py"],
-    ["msf/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/utils/__init__.py"],
+    ["msf/utils/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/utils/__init__.py"],
     ["msf/utils/singleton.py", "github:surdouski/micropython-sniffs-framework/msf/utils/singleton.py"]
   ],
   "deps": [
