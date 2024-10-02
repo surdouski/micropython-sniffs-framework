@@ -1,5 +1,5 @@
 from pathlib import Path
-from settings import DEVICES_SETTINGS_PATH
+from msf import DEVICES_SETTINGS_PATH
 
 from mpstore import write_store, read_store
 from msf.utils.singleton import singleton

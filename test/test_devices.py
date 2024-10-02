@@ -6,7 +6,7 @@ sys.path.append(os.getcwd())
 
 from mpstore import load_store, write_store
 
-from msf.settings import DEVICES_SETTINGS_PATH
+from msf import DEVICES_SETTINGS_PATH
 from msf.device import (
     DevicesRegistry,
     DeviceSettingsValidationError,

@@ -6,11 +6,7 @@ if __name__ == "__main__":
 
 
 from msf.device import DevicesRegistry
-from msf.settings import *
-try:  # override the msf.settings with any user defined settings, if exists
-    from .settings import *
-except:
-    pass
+from msf import MQTT_DEVICES_TOPIC, MQTT_AS_CONFIG_PATH
 
 from mpstore import load_store
 from usniffs import Sniffs
