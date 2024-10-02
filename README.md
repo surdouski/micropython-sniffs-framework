@@ -29,11 +29,11 @@ make a framework. A framework should solve common problems and offer a variety t
 
 ## Installation
 
-Will write a more in depth approach to installations, but I am putting a `package.json` in most directories,
+~~Will write a more in depth approach to installations, but I am putting a `package.json` in most directories,
 each of them defining the requirements of that directory and any subdirectories. This should allow for easy
-installation of specific components of the project as the codebase becomes larger.
-
-Currently, the project is small. So, for now, simply install with the following command:
+installation of specific components of the project as the codebase becomes larger.~~ To simplify development for now,
+I am leaving a single `package.json` at the top level for installation, since the project is not large. So, for now,
+simply install with the following command:
 
 ```bash
 mpremote mip install github:surdouski/micropython-sniffs-framework 

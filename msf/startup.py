@@ -4,11 +4,14 @@ if __name__ == "__main__":
 
     sys.path.append(os.getcwd())
 
-import asyncio
 
 from msf.device import DevicesRegistry
-from settings import MQTT_DEVICES_TOPIC
-from settings import MQTT_AS_CONFIG_PATH
+from msf.settings import *
+try:  # override the msf.settings with any user defined settings, if exists
+    from .settings import *
+except:
+    pass
+
 from mpstore import load_store
 from usniffs import Sniffs
 from mqtt_as import config, MQTTClient

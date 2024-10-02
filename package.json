@@ -2,6 +2,7 @@
   "urls": [
     ["msf/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/__init__.py"],
     ["msf/startup.py", "github:surdouski/micropython-sniffs-framework/msf/startup.py"],
+    ["msf/settings.py", "github:surdouski/micropython-sniffs-framework/msf/settings.py"],
     ["msf/device/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/device/__init__.py"],
     ["msf/device/_device.py", "github:surdouski/micropython-sniffs-framework/msf/device/_device.py"],
     ["msf/__init__.py", "github:surdouski/micropython-sniffs-framework/msf/utils/__init__.py"],
@@ -12,5 +13,5 @@
     ["github:surdouski/micropython-persistent-storage", "main"],
     ["github:surdouski/micropython-sniffs", "main"]
   ],
-  "version": "0.3"
+  "version": "0.4"
 }
