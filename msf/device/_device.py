@@ -72,8 +72,10 @@ class Setting:
                 raise DeviceSettingsValidationError(
                     f"Was given setting value '{value}', but was not of expected type '{self.type.__name__}'."
                 )
-        self._value = value
-        self._on_update()
+
+        if self._value != value:
+            self._value = value
+            self._on_update()
 
     def _on_update(self):
         pass
