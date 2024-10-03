@@ -15,7 +15,6 @@ from mqtt_as import config, MQTTClient
 sniffs = Sniffs()
 devices = DevicesRegistry()
 
-
 @sniffs.route(MQTT_DEVICES_TOPIC + "/<device>/<setting>")
 async def update_devices(device, setting, message):
     try:
@@ -31,5 +30,6 @@ async def startup():
     for key, val in mqtt_as_config.items():
         config[key] = val
     mqtt_client = MQTTClient(config)
+    sniffs.on_connect = devices.on_mqtt_connect(mqtt_client)
     await sniffs.bind(mqtt_client)
     await sniffs.client.connect()

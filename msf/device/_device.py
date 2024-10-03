@@ -1,5 +1,6 @@
+import asyncio
 from pathlib import Path
-from msf import DEVICES_SETTINGS_PATH
+from msf import DEVICES_SETTINGS_PATH, MQTT_DEVICES_TOPIC
 
 from mpstore import write_store, read_store
 from msf.utils.singleton import singleton
@@ -72,8 +73,10 @@ class Setting:
                 raise DeviceSettingsValidationError(
                     f"Was given setting value '{value}', but was not of expected type '{self.type.__name__}'."
                 )
-        self._value = value
-        self._on_update()
+
+        if self._value != value:
+            self._value = value
+            self._on_update()
 
     def _on_update(self):
         pass
@@ -214,3 +217,12 @@ class DevicesRegistry:
         setting = device.settings[setting_name]
         setting.update(setting_value)
         write_store(f"{device_name}.{setting.name}.value", str(setting.value), str(DEVICES_SETTINGS_PATH))
+
+    async def on_mqtt_connect(self, client):
+        to_be_published = []
+        for device in self.devices.values():
+            for setting in device.settings:
+                to_be_published.append(client.publish(setting.description, f"{MQTT_DEVICES_TOPIC}/{device.name}/description"))
+                to_be_published.append(client.publish(setting.type.__name__, f"{MQTT_DEVICES_TOPIC}/{device.name}/type"))
+                to_be_published.append(client.publish(setting.value, f"{MQTT_DEVICES_TOPIC}/{device.name}/value/reported"))
+        await asyncio.gather(*to_be_published)
