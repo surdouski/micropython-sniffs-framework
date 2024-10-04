@@ -15,7 +15,7 @@ from mqtt_as import config, MQTTClient
 sniffs = Sniffs()
 devices = DevicesRegistry()
 
-@sniffs.route(MQTT_DEVICES_TOPIC + "/<device>/<setting>")
+@sniffs.route(MQTT_DEVICES_TOPIC + "/<device>/<setting>/value")
 async def update_devices(device, setting, message):
     try:
         devices.update_device_setting(device, setting, message)
