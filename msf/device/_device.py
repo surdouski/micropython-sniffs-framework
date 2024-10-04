@@ -109,6 +109,9 @@ class Settings:
     def __contains__(self, key: str) -> bool:
         return key in self._dict
 
+    def __iter__(self):
+        return iter(self._dict.values())
+
     def get(self, key: str):
         return self._dict.get(key)
 
@@ -175,6 +178,8 @@ class Device:
 
 @singleton
 class DevicesRegistry:
+    devices: dict[str, Device]
+    devices_loaded: bool
     device_settings_path: Path = DEVICES_SETTINGS_PATH  # For ease of access
 
     def __getitem__(self, key: str) -> Device:
@@ -195,7 +200,7 @@ class DevicesRegistry:
         return None
 
     def __init__(self):
-        self.devices: dict[str, Device] = {}
+        self.devices = {}
         self.devices_loaded = False
 
     def reset(self):
@@ -222,7 +227,7 @@ class DevicesRegistry:
         to_be_published = []
         for device in self.devices.values():
             for setting in device.settings:
-                to_be_published.append(client.publish(setting.description, f"{MQTT_DEVICES_TOPIC}/{device.name}/description"))
-                to_be_published.append(client.publish(setting.type.__name__, f"{MQTT_DEVICES_TOPIC}/{device.name}/type"))
-                to_be_published.append(client.publish(setting.value, f"{MQTT_DEVICES_TOPIC}/{device.name}/value/reported"))
+                to_be_published.append(client.publish(f"{MQTT_DEVICES_TOPIC}/{device.name}/{setting.name}/description", str(setting.description), retain=True))
+                to_be_published.append(client.publish(f"{MQTT_DEVICES_TOPIC}/{device.name}/{setting.name}/type", str(setting.type.__name__), retain=True))
+                to_be_published.append(client.publish(f"{MQTT_DEVICES_TOPIC}/{device.name}/{setting.name}/value/reported", str(setting.value), retain=True))
         await asyncio.gather(*to_be_published)

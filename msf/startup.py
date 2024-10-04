@@ -30,6 +30,8 @@ async def startup():
     for key, val in mqtt_as_config.items():
         config[key] = val
     mqtt_client = MQTTClient(config)
-    sniffs.on_connect = devices.on_mqtt_connect(mqtt_client)
+    async def _on_connect():  # don't want to think about async lambda syntax atm
+        await devices.on_mqtt_connect(mqtt_client)
+    sniffs.on_connect = _on_connect
     await sniffs.bind(mqtt_client)
     await sniffs.client.connect()
