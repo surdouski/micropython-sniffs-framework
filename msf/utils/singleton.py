@@ -1,3 +1,10 @@
+from usniffs import Sniffs
+
+
+class SingletonDNEError(Exception):
+    ...
+
+
 def singleton(cls):
     """Singleton decorator for classes. Use this instead of globals where possible."""
     instance = None
@@ -9,3 +16,12 @@ def singleton(cls):
         return instance
 
     return getinstance
+
+
+@singleton
+class SniffsSingleton(Sniffs):
+    ...
+
+
+def get_sniffs() -> SniffsSingleton:
+    return SniffsSingleton()
