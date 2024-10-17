@@ -133,7 +133,7 @@ def pump_change_duty_cycle(new_value):
     pwm.duty_u16(new_value)
 ```
 
-Whenever the `duty_u16` setting was updated, it would trigger the `pump_change_duty_cycle` function and update the `PWM` to use the `new_value`. The setting could be updated non-locally through the `device-ops` tool, with the following command:
+Whenever the `duty_u16` setting was updated, it would trigger the `pump_change_duty_cycle` function and update the `PWM` to use the `new_value`. The setting could be updated non-locally through the `msf-cli` tool, with the following command:
 
 ```bash
 msf devices water_pump duty_u16 --set=4000 --type=int
