@@ -1,18 +1,9 @@
 from msf.utils.singleton import get_sniffs, singleton
 from msf import MQTT_SENSORS_TOPIC
 
-# TODO: finish foreign sensor and create registries for both. possibly abstract the registry idea afterward.
 
-
-class InvalidSensorConstructorArgs(Exception):
-    ...
-
-
-# Define update_func outside the class
-async def update_func(remote_sensor, message):
-    # Interpret the raw value from /value as the sensor value.
-    remote_sensor._value = message
-    remote_sensor._on_update(remote_sensor._value)
+# class InvalidSensorConstructorArgs(Exception):
+#     ...
 
 
 class RemoteSensor:
@@ -21,7 +12,8 @@ class RemoteSensor:
     def value(self):
         return self._value
 
-    def __init__(self, name: str = "", topic: str = ""):
+    # def __init__(self, name: str = "", topic: str = ""):
+    def __init__(self, name: str = ""):
         # if not (name or topic):
         #     raise InvalidSensorConstructorArgs("Must provide either name or topic.")
         # if name and topic:
@@ -49,7 +41,6 @@ class RemoteSensor:
         if self._value != value:
             self._value = value
             self._on_update()
-
 
     def _on_update(self):
         pass
@@ -105,19 +96,55 @@ class LocalSensor:
     def value(self):
         return self._value
 
-    def __init__(self, name: str = "", topic: str = "", value = None):
-        if not (name or topic):
-            raise InvalidSensorConstructorArgs("Must provide either name or topic.")
-        if name and topic:
-            raise InvalidSensorConstructorArgs("Provided both name and topic, but must only provide one.")
+    # def __init__(self, name: str = "", topic: str = "", value = None):
+    def __init__(self, name: str = "", value = None):
+        # if not (name or topic):
+        #     raise InvalidSensorConstructorArgs("Must provide either name or topic.")
+        # if name and topic:
+        #     raise InvalidSensorConstructorArgs("Provided both name and topic, but must only provide one.")
+        # if name:
+        #     self.topic = MQTT_SENSORS_TOPIC + "/" + name
+        # else:
+        #     self.topic = topic
 
-        if name:
-            self.topic = MQTT_SENSORS_TOPIC + "/" + name
-        else:
-            self.topic = topic
+        self.topic = MQTT_SENSORS_TOPIC + "/" + name
         self._value =  value
+        LocalSensorsRegistry()[name] = self
 
     async def update(self, new_value):
         self._value = new_value
         sniffs = get_sniffs()
         await sniffs.client.publish(f"{self.topic}/value", str(new_value))
+
+@singleton
+class LocalSensorsRegistry:
+    local_sensors: dict[str, LocalSensor]
+
+    def __getitem__(self, key: str) -> LocalSensor:
+        return self.local_sensors[key]
+
+    def __setitem__(self, key: str, value: LocalSensor):
+        self.local_sensors[key] = value
+
+    def __repr__(self) -> str:
+        return f"LocalSensors({self.local_sensors})"
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.local_sensors
+
+    def get(self, local_sensor) -> LocalSensor:  # |  None
+        if local_sensor in self:
+            return self[local_sensor]
+
+    def __init__(self):
+        self.local_sensors = {}
+
+    def reset(self):
+        self.local_sensors = {}
+
+    def update_local_sensor(self, sensor_name: str, sensor_value: any):
+        if sensor_name not in self.local_sensors:
+            raise KeyError(f"LocalSensor '{sensor_name}' not found.")
+
+        local_sensor = self.local_sensors[sensor_name]
+        local_sensor.update(sensor_value)

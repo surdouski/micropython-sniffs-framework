@@ -23,9 +23,11 @@ remote_sensors = RemoteSensorsRegistry()
 async def update_devices(device, setting, message):
     try:
         devices.update_device_setting(device, setting, message)
+    except KeyError:
+        pass  # TODO: Remove this when dynamic routing is available.
     except Exception as exception:
         # don't allow crashes from the update_devices call, just log it
-        print(exception)  # TODO: create/find a better logging solution
+        print(exception)  # TODO: Create/find a better logging solution.
         pass
 
 
@@ -33,9 +35,11 @@ async def update_devices(device, setting, message):
 async def update_remote_sensors(sensor, message):
     try:
         remote_sensors.update_remote_sensor(sensor, message)
+    except KeyError:
+        pass  # TODO: Remove this when dynamic routing is available.
     except Exception as exception:
         # don't allow crashes from the update_devices call, just log it
-        print(exception)  # TODO: create/find a better logging solution
+        print(exception)  # TODO: Create/find a better logging solution.
         pass
 
 
