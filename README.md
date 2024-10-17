@@ -136,7 +136,7 @@ def pump_change_duty_cycle(new_value):
 Whenever the `duty_u16` setting was updated, it would trigger the `pump_change_duty_cycle` function and update the `PWM` to use the `new_value`. The setting could be updated non-locally through the `device-ops` tool, with the following command:
 
 ```bash
-dops devices water_pump duty_u16 --set=4000 --type=int
+msf devices water_pump duty_u16 --set=4000 --type=int
 ```
 
 _Note: In the future, the need to specify the type, e.g. `--type=int` will go away, as that's validated on the hardware now._
