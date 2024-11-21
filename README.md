@@ -47,7 +47,7 @@ def on_update_foo(value):
 ```python
 from msf.sensor import LocalSensor
 local_sensor_foo = LocalSensor(name="foo_sensor")
-local_sensor_foo.update(42)
+await local_sensor_foo.update(42)
 ```
 
 When `local_sensor_foo.update(42)` is called, the other hardware device with `remote_sensor_foo` defined will print `42`.
