@@ -19,5 +19,5 @@
     ["github:surdouski/micropython-persistent-storage", "main"],
     ["github:surdouski/micropython-sniffs", "main"]
   ],
-  "version": "0.4"
+  "version": "0.5"
 }
