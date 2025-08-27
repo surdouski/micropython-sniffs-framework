@@ -2,8 +2,8 @@ from msf.utils.singleton import get_sniffs, singleton
 from msf import MQTT_SENSORS_TOPIC
 
 
-# class InvalidSensorConstructorArgs(Exception):
-#     ...
+class InvalidSensorConstructorArgs(Exception):
+    ...
 
 
 class RemoteSensor:
@@ -12,27 +12,19 @@ class RemoteSensor:
     def value(self):
         return self._value
 
-    # def __init__(self, name: str = "", topic: str = ""):
-    def __init__(self, name: str = ""):
-        # if not (name or topic):
-        #     raise InvalidSensorConstructorArgs("Must provide either name or topic.")
-        # if name and topic:
-        #     raise InvalidSensorConstructorArgs("Provided both name and topic, but must only provide one.")
-        # if name:
-        #     self.topic = MQTT_SENSORS_TOPIC + "/" + name
-        # else:
-        #     self.topic = topic
-        # sniffs = get_sniffs()
-        # sniffs.router.register(self.topic + "/value", lambda message: update_func(self, message))
-        # @sniffs.route(self.topic + "/value")
-        # async def update_func(message):
-        #     # TODO: In future iterations, lets make a protocol for this message so that we can
-        #     #   store more info inside of it. For now, we can just interpret the raw value at /value
-        #     #   as the value.
-        #     self._value = message
-        #     self._on_update(self._value)
+    def __init__(self, name: str, topic_override: str = ""):
+        """If topic_override is provided, will override the default MQTT_SENSORS_TOPIC/sensor_name/value topic."""
+        if topic_override:
+            self.topic = topic_override
+        else:
+            self.topic = MQTT_SENSORS_TOPIC + "/" + name + "/value"
 
-        self.topic = MQTT_SENSORS_TOPIC + "/" + name
+        sniffs = get_sniffs()
+        @sniffs.route(self.topic)
+        async def update_func(message):
+            self._value = message
+            self._on_update()
+
         self._value = None
 
         RemoteSensorsRegistry()[name] = self
@@ -96,25 +88,21 @@ class LocalSensor:
     def value(self):
         return self._value
 
-    # def __init__(self, name: str = "", topic: str = "", value = None):
-    def __init__(self, name: str = "", value = None):
-        # if not (name or topic):
-        #     raise InvalidSensorConstructorArgs("Must provide either name or topic.")
-        # if name and topic:
-        #     raise InvalidSensorConstructorArgs("Provided both name and topic, but must only provide one.")
-        # if name:
-        #     self.topic = MQTT_SENSORS_TOPIC + "/" + name
-        # else:
-        #     self.topic = topic
+    def __init__(self, name: str, topic_override: str = ""):
+        """If topic_override is provided, will override the default MQTT_SENSORS_TOPIC/sensor_name/value topic."""
+        if topic_override:
+            self.topic = topic_override
+        else:
+            self.topic = MQTT_SENSORS_TOPIC + "/" + name + "/value"
 
-        self.topic = MQTT_SENSORS_TOPIC + "/" + name
-        self._value =  value
+        self._value = None
+
         LocalSensorsRegistry()[name] = self
 
     async def update(self, new_value):
         self._value = new_value
         sniffs = get_sniffs()
-        await sniffs.client.publish(f"{self.topic}/value", str(new_value))
+        await sniffs.client.publish(f"{self.topic}", str(new_value))
 
 @singleton
 class LocalSensorsRegistry:

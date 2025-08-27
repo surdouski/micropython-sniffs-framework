@@ -41,5 +41,6 @@ class SensorTests(unittest.TestCase):
         self.remote_sensors_registry.update_remote_sensor("foo", 22)
 
         assert value_updated == 22, f"Expected: 22, Actual: {value_updated}"
+        assert self.remote_sensors_registry.get("foo").value == 22, f"Expected: 22, Actual: {self.remote_sensors_registry.get('foo').value}"
 
 unittest.main()
