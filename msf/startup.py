@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
 from msf.utils.rtc import set_rtc
 from msf.device import DevicesRegistry
-from msf import MQTT_DEVICES_TOPIC, MQTT_AS_CONFIG_PATH, MQTT_SENSORS_TOPIC
+from msf import MQTT_DEVICES_TOPIC, MQTT_AS_CONFIG_PATH
 
 from mpstore import load_store
 from msf.utils.singleton import SniffsSingleton
@@ -19,22 +19,11 @@ sniffs = SniffsSingleton()
 devices = DevicesRegistry()
 remote_sensors = RemoteSensorsRegistry()
 
+
 @sniffs.route(MQTT_DEVICES_TOPIC + "/<device>/<setting>/value")
 async def update_devices(device, setting, message):
     try:
         devices.update_device_setting(device, setting, message)
-    except KeyError:
-        pass  # TODO: Remove this when dynamic routing is available.
-    except Exception as exception:
-        # don't allow crashes from the update_devices call, just log it
-        print(exception)  # TODO: Create/find a better logging solution.
-        pass
-
-
-@sniffs.route(MQTT_SENSORS_TOPIC + "/<sensor>/value")
-async def update_remote_sensors(sensor, message):
-    try:
-        remote_sensors.update_remote_sensor(sensor, message)
     except KeyError:
         pass  # TODO: Remove this when dynamic routing is available.
     except Exception as exception:
